@@ -257,7 +257,7 @@ def equilibriumAngleForDifferentTailAngles(stop = 200, trueWindAngle = 0, positi
 
 if __name__ == '__main__':
 
-	"""
+	
 	dt                          = 0.01
 	t                           = 0
 	fig                         = plt.figure()
@@ -284,13 +284,13 @@ if __name__ == '__main__':
 		drawWingSailIRT(wingState[0][0],wingState[2][0],trueWindAngle,trueWindSpeed)
 		plt.pause(0.0001)
 	plt.show()
-	"""
+	
 
 
 
 	# ===== Equilibrium position in function of the position of the aerodynamic center (Theory forces) ===== #
 	
-	
+	"""
 	plt.figure()
 	timesRK2,statesRK2O = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'O')
 	drawWingSailAngle(timesRK2,statesRK2O[0,:],'on rot axis','RK2')
@@ -302,7 +302,7 @@ if __name__ == '__main__':
 	drawWingSailAngle(timesRK2,statesRK2A[0,:],'after rot axis','RK2 (theoretical forces)')
 	plt.legend()
 	plt.savefig('Simulation_pics/Comparison position aerodynamic center for theoretical aerodynamic forces.png')
-	
+	"""
 	
 
 	# ==== Equilibrium position in function of the position of the aerodynamic center (Experimental forces) ===== #
