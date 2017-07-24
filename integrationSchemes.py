@@ -53,7 +53,7 @@ def rk2Scheme(state, start, stop, stepSize, evolutionFunction,trueWindAngle=0,po
 
 def evolution(X,t,trueWindAngle=0,positionAerodynamicCenter='A',aerodynamicForces='T'):
 	k = 0
-	g = 9.81
+	g = 60
 	l = 1
 	Xdot = [0]*2
 	Xdot[0] = X[1]
@@ -69,7 +69,7 @@ def evolution(X,t,trueWindAngle=0,positionAerodynamicCenter='A',aerodynamicForce
 if __name__=='__main__':
 	state = np.array([[0.3],[0]])
 #	times,stateListE   = eulerScheme(state,0,50,0.01,evolution)
-	times,stateListRK2 = rk2Scheme(state,0,50,0.01,evolution)
+	times,stateListRK2 = rk2Scheme(state,0,100,0.01,evolution)
 	plt.figure()
 #	plt.plot(times,stateListE[0,:],'b')
 	plt.plot(times,stateListRK2[0,:],'g')
