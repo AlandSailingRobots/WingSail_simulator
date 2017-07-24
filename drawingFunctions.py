@@ -35,7 +35,7 @@ def drawEquilibriumAngles(equilibriumAngles,ident='FDSA'):
 		title =str(title)
 	plt.figure()
 	plt.axis([-2,2,-2,2])
-	if ident == 'FDSWA':
+	if ident == 'FDTA':
 		for i in range(len(equilibriumAngles)):
 	#		print(i)
 			plt.text(np.cos(equilibriumAngles[i]),np.sin(equilibriumAngles[i]),str(i-26))
@@ -58,6 +58,22 @@ def drawEquilibriumAngles(equilibriumAngles,ident='FDSA'):
 	plt.title(title.upper())
 	return()
 
+def drawEvolutionMWAngle(evolutionAngles,times,ident = 'FDSA'):
+	title = input("Enter title of Figure :")
+	if type(title) != str:
+		title =str(title) 
+	plt.figure()
+	if ident == 'FDTA':
+		for i in range(len(evolutionAngles)):
+			plt.plot(times,evolutionAngles[i],label='TA= '+str(i-26))
+	else:
+		for i in range(len(evolutionAngles)):
+			plt.plot(times,evolutionAngles[i][0,:],label='SA= '+str(i-30))
+	plt.legend(ncol = 4 ,fontsize = 4, )
+	plt.axis([0,times[-1]+10,-10,10])
+	plt.title(title.upper())
+	return()
+		
 def drawWingSailIRT(theta, canardAngle, trueWindAngle, trueWindSpeed):
 	tailAngle = wrapTo2pi(-2*canardAngle)
 	

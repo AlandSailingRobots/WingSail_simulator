@@ -17,10 +17,11 @@ def wrapTo2pi(theta):
 	theta = 2.0*np.arctan(np.tan(theta/2.0))
 	return(theta)
 
-
+"""
 print(degTorad(5))
 print(degTorad(10))
 print(degTorad(15))
 print(degTorad(20))
 print(degTorad(25))
 print(degTorad(30))
+"""

@@ -15,7 +15,7 @@ Note:
 """
 
 import numpy as np
-from drawingFunctions import drawWingSailAngle, drawWingSailIRT, drawEquilibriumAngles, drawArrow
+from drawingFunctions import drawWingSailAngle, drawWingSailIRT, drawEquilibriumAngles, drawArrow, drawEvolutionMWAngle
 from integrationSchemes import eulerScheme, rk2Scheme,rk2Step
 from angleFunctions import wrapTo2pi, degTorad, radTodeg
 import matplotlib.pyplot as plt
@@ -203,7 +203,7 @@ def evolution(X,t,trueWindAngle=0,positionAerodynamicCenter='A', AeroDynamicForc
 #                                  Parameters Testing Methods                                      #
 ####################################################################################################
 
-""" Results will mean nothing until the problem of how to implement angles is fixed """
+
 def equilibriumAngleForDifferentStartAngles(wingState, stop=200,trueWindAngle = 0, positionAerodynamicCenter = 'A', aerodynamicForces = 'T'):
 	equilibriumAnglesFDSA = [] #FDSA = ForDifferentStartAngles
 	for i in range(-30,31):
@@ -212,20 +212,37 @@ def equilibriumAngleForDifferentStartAngles(wingState, stop=200,trueWindAngle = 
 		stopTime      = stop
 		stepSize      = 0.01
 		wingState[0]  = wrapTo2pi(degTorad(i))
+		wingState[1]  = 0
 		times, states = rk2Scheme(wingState, startTime, stopTime, stepSize, evolution, trueWindAngle, positionAerodynamicCenter,aerodynamicForces)
 		states        = states[0][-3:]
 		equilibriumAnglesFDSA.append(np.mean(states))
 	return(equilibriumAnglesFDSA)
 
 
+def evolutionMWAngleForDifferentStartAngles(wingState, stop=200,trueWindAngle = 0, positionAerodynamicCenter = 'A', aerodynamicForces = 'T'):
+	evolutionAnglesFDSA = [] #FDSA = ForDifferentStartAngles
+	times =[]
+	for i in range(-30,31):
+		print(i)
+		startTime     = 0
+		stopTime      = stop
+		stepSize      = 0.01
+		wingState[0]  = wrapTo2pi(degTorad(i))
+		wingState[1]  = 0
+		times, states = rk2Scheme(wingState, startTime, stopTime, stepSize, evolution, trueWindAngle, positionAerodynamicCenter,aerodynamicForces)
+		evolutionAnglesFDSA.append(states)
+	return(evolutionAnglesFDSA,times)
+
 
 
 """ Results will mean nothing until the problem of how to implement angles is fixed """
-def equilibriumAngleForDifferentSWAngles(wingState, stop = 200, trueWindAngle = 0, positionAerodynamicCenter = 'A', aerodynamicForces = 'T'):
-	equilibriumAnglesFDSWA = [] #FDSWA = ForDifferentSWAngles
+def equilibriumAngleForDifferentTailAngles(stop = 200, trueWindAngle = 0, positionAerodynamicCenter = 'A', aerodynamicForces = 'T'):
+	equilibriumAnglesFDTA = [] #FDTA = ForDifferentTailAngles
 	for i in range (-maxTailAngle,maxTailAngle+1):
 		print(i)
 		tailAngle    = wrapTo2pi(degTorad(i))
+		wingState[0] = 0
+		wingState[1] = 0
 		wingState[2] = tailAngle
 		startTime    = 0
 		stopTime     = stop
@@ -271,9 +288,9 @@ if __name__ == '__main__':
 
 
 
-	# ===== Equilibrium position in function of the position of the aerodynamic center (Theory forces) =====
+	# ===== Equilibrium position in function of the position of the aerodynamic center (Theory forces) ===== #
 	
-	"""
+	
 	plt.figure()
 	timesRK2,statesRK2O = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'O')
 	drawWingSailAngle(timesRK2,statesRK2O[0,:],'on rot axis','RK2')
@@ -285,10 +302,10 @@ if __name__ == '__main__':
 	drawWingSailAngle(timesRK2,statesRK2A[0,:],'after rot axis','RK2 (theoretical forces)')
 	plt.legend()
 	plt.savefig('Simulation_pics/Comparison position aerodynamic center for theoretical aerodynamic forces.png')
-	"""
+	
 	
 
-	# ==== Equilibrium position in function of the position of the aerodynamic center (Experimental forces) =====
+	# ==== Equilibrium position in function of the position of the aerodynamic center (Experimental forces) ===== #
 	
 	"""
 	plt.figure()
@@ -303,8 +320,9 @@ if __name__ == '__main__':
 	plt.legend()
 	plt.savefig('Simulation_pics/Comparison position aerodynamic center for experimental aerodynamic forces.png')
 	"""
-	# ===== Equilibrium position in function of the forces (aerodynamic center behind the mast)
 	
+	# ===== Equilibrium position in function of the forces (aerodynamic center behind the mast) ===== #
+	"""
 	plt.figure()
 	timesRK2,statesRK2A = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'A','CFD')
 	drawWingSailAngle(timesRK2,statesRK2A[0,:],'experimental forces','RK2')
@@ -312,10 +330,25 @@ if __name__ == '__main__':
 	drawWingSailAngle(timesRK2,statesRK2A[0,:],'theoretical forces','RK2')
 	plt.legend()
 	plt.savefig('Simulation_pics/Comparison type of forces aerodynamic center behind the mast.png')
-	
-	
+	"""
 
-	# ===== Equilibrium position for different Start angles =====
+
+
+	# ===== Evolution of the MW angle for different Start angles ===== #
+	"""
+	evolutionAnglesFDSA,times = evolutionMWAngleForDifferentStartAngles(wingState,200,trueWindAngle,'A', 'T') 
+	drawEvolutionMWAngle(evolutionAnglesFDSA,times)
+	plt.savefig('Simulation_pics/evolution of main wing angles for different start angles theoretical forces_aerodynamic center behind the mast')
+	"""
+
+	"""
+	evolutionAnglesFDSA,times = evolutionMWAngleForDifferentStartAngles(wingState,200,trueWindAngle,'A', 'CFD') 
+	drawEvolutionMWAngle(evolutionAnglesFDSA,times)
+	plt.savefig('Simulation_pics/evolution of main wing angles for different start angles experimental forces_aerodynamic center behind the mast')
+	"""
+	# ===== Equilibrium position for different Start angles ===== #
+
+	# Warning!! run the previous section before in order to put a reasonnable stop point
 	
 	"""
 	equilibriumAnglesFDSA  = equilibriumAngleForDifferentStartAngles(wingState,200,trueWindAngle,'A','T')
@@ -324,16 +357,17 @@ if __name__ == '__main__':
 	"""
 	
 	"""
-	equilibriumAnglesFDSA  = equilibriumAngleForDifferentStartAngles(wingState,100,trueWindAngle,'A','CFD')
+	equilibriumAnglesFDSA  = equilibriumAngleForDifferentStartAngles(wingState,200,trueWindAngle,'A','CFD')
 	drawEquilibriumAngles( equilibriumAnglesFDSA)
 	plt.savefig('Simulation_pics/equilibrium angles for different start angles experimental forces_aerodynamic center behind the mast.png')
 	"""
 
-
-	# ===== Equilibrium position for different servo wing angles (start at 0)=====
+	
+	# ===== Equilibrium position for different servo wing angles (start at 0)===== #
 	"""
-	equilibriumAnglesFDSWA = equilibriumAngleForDifferentSWAngles(wingState,trueWindAngle)
-	drawEquilibriumAngles( equilibriumAnglesFDSWA,'FDSWA')
-	plt.show()
-
+	plt.figure()
+	equilibriumAnglesFDTA = equilibriumAngleForDifferentTailAngles(wingState,200,trueWindAngle,'A','T')
+	drawEquilibriumAngles( equilibriumAnglesFDTA,'FDTA')
+	plt.savefig('Simulation_pics/equilibrium angles for different tail angles theoretical forces_aerodynamic center behind the mast.png')
 	"""
+	
