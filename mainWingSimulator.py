@@ -15,7 +15,7 @@ Note:
 """
 
 import numpy as np
-from drawingFunctions import drawWingSailAngle, drawWingSailIRT, drawEquilibriumAngles, drawArrow, drawEvolutionMWAngle
+from drawingFunctions import drawWingSailAngle, drawWingSailIRT, drawEquilibriumAngles, drawArrow, drawEvolutionMWAngle, drawHull
 from integrationSchemes import eulerScheme, rk2Scheme,rk2Step
 from angleFunctions import wrapTo2pi, degTorad, radTodeg
 import matplotlib.pyplot as plt
@@ -133,23 +133,23 @@ def aerodynamicForcesTheory(alpha,tailAngle):
 
 
 	liftForceSW = constPartWindForceSW*SWDesignedLiftCoefficient*wrapTo2pi(dontKnowHowToName*alpha-tailAngle)*5.91
-	#print(5.91*constPartWindForceSW*SWDesignedLiftCoefficient, "wr", wrapTo2pi(dontKnowHowToName*alpha))
-	dragForceMW = 2
+	#print(5.91*constpartwindforcesw*swdesignedliftcoefficient, "wr", wrapto2pi(dontknowhowtoname*alpha))
+	dragforcemw = 2
 
-	dragForceSW = 2
+	dragforcesw = 2
 
-	return (liftForceMW, liftForceSW, dragForceMW, dragForceSW)
-
-
+	return (liftforcemw, liftforcesw, dragforcemw, dragforcesw)
 
 
 
 
-def equationθpp(state, trueWindAngle,positionAerodynamicCenter ='A', aerodynamicForces = 'T' ):
-	alpha      = angleOfAttackMW(state[0][0],trueWindAngle)
-	tailAngle  = state[2][0]
-	if aerodynamicForces == 'T':
-		liftForceMW,liftForceSW,dragForceMW,dragForceSW = aerodynamicForcesTheory(alpha,tailAngle)  
+
+
+def equationθpp(state, truewindangle,positionAerodynamicCenter ='a', aerodynamicForces = 't' ):
+	alpha      = angleOfAttackMW(state[0][0],truewindangle)
+	tailangle  = state[2][0]
+	if aerodynamicForces == 't':
+		liftforcemw,liftForceSW,dragForceMW,dragForceSW = aerodynamicForcesTheory(alpha,tailAngle)  
 	else:
 		liftForceMW,liftForceSW,dragForceMW,dragForceSW = aerodynamicForcesCFD(alpha,tailAngle)   
 	tailRelatedPartLift     = distanceTail*liftForceSW
@@ -267,8 +267,8 @@ if __name__ == '__main__':
 	while t+dt <=1700:
 		t               = t+dt
 		plt.cla()
-		ax.set_xlim(-10,10)
-		ax.set_ylim(-10,10)
+		ax.set_xlim(-15,15)
+		ax.set_ylim(-15,15)
 ##		print(t)
 ##		wingState = wingState + dt*evolution(wingState,1)
 ##		wingState[0],wingState[1] = wrapTo2pi(wingState[0]),wrapTo2pi(wingState[1]
@@ -282,6 +282,7 @@ if __name__ == '__main__':
 ##		print(angleLift,lift)
 ##		drawArrow(0, 0, angleLift, lift,'b')
 		drawWingSailIRT(wingState[0][0],wingState[2][0],trueWindAngle,trueWindSpeed)
+		drawHull(0)
 		plt.pause(0.0001)
 	plt.show()
 	
@@ -328,7 +329,7 @@ if __name__ == '__main__':
 	drawWingSailAngle(timesRK2,statesRK2A[0,:],'experimental forces','RK2')
 	timesRK2,statesRK2A = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle)
 	drawWingSailAngle(timesRK2,statesRK2A[0,:],'theoretical forces','RK2')
-	plt.legend()
+	 plt.legend()
 	plt.savefig('Simulation_pics/Comparison type of forces aerodynamic center behind the mast.png')
 	"""
 

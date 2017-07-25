@@ -73,7 +73,25 @@ def drawEvolutionMWAngle(evolutionAngles,times,ident = 'FDSA'):
 	plt.axis([0,times[-1]+10,-10,10])
 	plt.title(title.upper())
 	return()
-		
+
+
+def drawHull(heading):
+
+	hull = np.array([[ 6,  3, -1, -7, -7, -1,  3,  6],
+	                 [ 0,  2,  3,  1, -1, -3, -2,  0],
+	                 [ 1,  1,  1,  1,  1,  1,  1,  1]])
+
+	rotationMatrix = np.array([[np.cos(heading), -np.sin(heading), 0],
+                               [np.sin(heading),  np.cos(heading), 0],
+							   [              0,                0, 1]])
+
+	hull = rotationMatrix.dot(hull)
+
+	plt.plot(hull[0,:],hull[1,:],'k')
+	return ()
+
+
+
 def drawWingSailIRT(theta, canardAngle, trueWindAngle, trueWindSpeed):
 	tailAngle = wrapTo2pi(-2*canardAngle)
 	
@@ -112,8 +130,8 @@ def drawWingSailIRT(theta, canardAngle, trueWindAngle, trueWindSpeed):
 #	print('theta: ',theta)
 #	print('canardDeviation: ',canardDeviation)
 #	print('tailDeviation: ',tailDeviation)
-	plt.text(-5,9,'Wind:')
-	drawArrow(-5.0,7.0,trueWindAngle,trueWindSpeed,'k')
+	plt.text(-11,13,'Wind:')
+	drawArrow(-9.0,10.0,trueWindAngle,trueWindSpeed,'k')
 	drawArrow(4.8*np.cos(theta),4.8*np.sin(theta),canardDeviation,1,'b')
 	drawArrow(-5.5*np.cos(theta),-5.5*np.sin(theta),tailDeviation,1,'g')
 
