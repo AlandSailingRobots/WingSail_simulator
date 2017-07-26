@@ -130,26 +130,27 @@ def aerodynamicForcesCFD(alpha,tailAngle):
 def aerodynamicForcesTheory(alpha,tailAngle):
 	liftForceMW = constPartWindForceMW*MWDesignedLiftCoefficient*alpha*5.91
 	#print (constPartWindForceMW*MWDesignedLiftCoefficient*5.91)
-
+	print(tailAngle)
 
 	liftForceSW = constPartWindForceSW*SWDesignedLiftCoefficient*wrapTo2pi(dontKnowHowToName*alpha-tailAngle)*5.91
 	#print(5.91*constpartwindforcesw*swdesignedliftcoefficient, "wr", wrapto2pi(dontknowhowtoname*alpha))
-	dragforcemw = 0
+	dragForceMW = 0
 
-	dragforcesw = 0
+	dragForceSW = 0
 
-	return (liftforcemw, liftforcesw, dragforcemw, dragforcesw)
-
-
+	return (liftForceMW, liftForceSW, dragForceMW, dragForceSW)
 
 
 
 
-def equationθpp(state, truewindangle,positionAerodynamicCenter ='a', aerodynamicForces = 't' ):
+
+
+def equationθpp(state, truewindangle,positionAerodynamicCenter ='A', aerodynamicForces = 'T' ):
 	alpha      = angleOfAttackMW(state[0][0],truewindangle)
 	tailangle  = state[2][0]
-	if aerodynamicForces == 't':
-		liftforcemw,liftForceSW,dragForceMW,dragForceSW = aerodynamicForcesTheory(alpha,tailAngle)  
+	print(tailAngle)
+	if aerodynamicForces == 'T':
+		liftForceMW,liftForceSW,dragForceMW,dragForceSW = aerodynamicForcesTheory(alpha,tailAngle)  
 	else:
 		liftForceMW,liftForceSW,dragForceMW,dragForceSW = aerodynamicForcesCFD(alpha,tailAngle)   
 	tailRelatedPartLift     = distanceTail*liftForceSW
