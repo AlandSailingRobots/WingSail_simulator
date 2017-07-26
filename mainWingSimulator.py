@@ -118,11 +118,11 @@ def angleOfLiftForceMW(state,trueWindAngle):
 def aerodynamicForcesCFD(alpha,tailAngle):
 	liftForceMW = 200.162*alpha # experimental formula
 
-	liftForceSW = 17.677*(wrapTo2pi(alpha-tailAngle)) # experimental formula
+	liftForceSW = 17.677*(wrapTo2pi(alpha)) # experimental formula  +X*wrapTo2pi(tailAngle)
 
 	dragForceMW = 101.086*alpha-10.596
 
-	dragForceSW = 0 #28.356*(alpha-tailAngle)**2-5.767*(alpha-tailAngle)+0.068
+	dragForceSW = 15.42*alpha-3.562
 
 	return (liftForceMW, liftForceSW, dragForceMW, dragForceSW)
 
@@ -254,6 +254,22 @@ def equilibriumAngleForDifferentTailAngles(stop = 200, trueWindAngle = 0, positi
 	return(equilibriumAnglesFDSWA)
 
 
+def evolutionMWAngleForDifferentTailAngles(wingState, stop=200,trueWindAngle = 0, positionAerodynamicCenter = 'A', aerodynamicForces = 'T'):
+	evolutionAnglesFDTA = [] #FDSA = ForDifferentStartAngles
+	times =[]
+	for i in range(-26,27):
+		print(i)
+		startTime     = 0
+		stopTime      = stop
+		stepSize      = 0.01
+		wingState[0]  = 0 
+		wingState[1]  = 0
+		wingState[2]  = wrapTo2pi(degTorad(i))
+		times, states = rk2Scheme(wingState, startTime, stopTime, stepSize, evolution, trueWindAngle, positionAerodynamicCenter,aerodynamicForces)
+		evolutionAnglesFDTA.append(states)
+	return(evolutionAnglesFDTA,times)
+
+
 
 if __name__ == '__main__':
 
@@ -298,17 +314,17 @@ if __name__ == '__main__':
 
 	timesRK2,statesRK2B = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'B')
 	drawWingSailAngle(timesRK2,statesRK2B[0,:],'before rot axis','RK2')
-
+	"""
 	timesRK2,statesRK2A = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle)
 	drawWingSailAngle(timesRK2,statesRK2A[0,:],'after rot axis','RK2 (theoretical forces)')
 	plt.legend()
 	plt.savefig('Simulation_pics/Comparison position aerodynamic center for theoretical aerodynamic forces.png')
-	"""
+	
 	
 
 	# ==== Equilibrium position in function of the position of the aerodynamic center (Experimental forces) ===== #
 	
-	
+	"""
 	plt.figure()
 	timesRK2,statesRK2O = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'O','CFD')
 	drawWingSailAngle(timesRK2,statesRK2O[0,:],'on rot axis','RK2')
@@ -320,7 +336,7 @@ if __name__ == '__main__':
 	drawWingSailAngle(timesRK2,statesRK2A[0,:],'after rot axis','RK2 (experimental forces)')
 	plt.legend()
 	plt.savefig('Simulation_pics/Comparison position aerodynamic center for experimental aerodynamic forces2.png')
-	
+	"""
 	
 	# ===== Equilibrium position in function of the forces (aerodynamic center behind the mast) ===== #
 	"""
@@ -363,8 +379,25 @@ if __name__ == '__main__':
 	plt.savefig('Simulation_pics/equilibrium angles for different start angles experimental forces_aerodynamic center behind the mast.png')
 	"""
 
+
+
+	# =====  Evolution of the MW angle for different tail angles ===== #
+
+	"""
+	evolutionAnglesFDTA,times = evolutionMWAngleForDifferentTailAngles(wingState,200,trueWindAngle,'A', 'T') 
+	drawEvolutionMWAngle(evolutionAnglesFDTA,times)
+	plt.savefig('Simulation_pics/evolution of main wing angles for different tail  angles theoretical forces_aerodynamic center behind the mast')
+	"""
+
+	"""
+	evolutionAnglesFDTA,times = evolutionMWAngleForDifferentTailAngles(wingState,200,trueWindAngle,'A', 'CFD') 
+	drawEvolutionMWAngle(evolutionAnglesFDTA,times)
+	plt.savefig('Simulation_pics/evolution of main wing angles for different tail angles experimental forces_aerodynamic center behind the mast')
+	"""
+
+
 	
-	# ===== Equilibrium position for different servo wing angles (start at 0)===== #
+	# ===== Equilibrium position for different servo wing angles (start at 0) ===== #
 	"""
 	plt.figure()
 	equilibriumAnglesFDTA = equilibriumAngleForDifferentTailAngles(wingState,200,trueWindAngle,'A','T')
