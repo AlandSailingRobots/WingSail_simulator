@@ -100,45 +100,46 @@ SWAngle               = wrapTo2pi(SWAngle)
 ####################################################################################################
 
 def angleOfAttackMW(MWAngle,trueWindAngle):
-	return(wrapTo2pi(trueWindAngle-MWAngle-np.pi))
+	return(-wrapTo2pi(trueWindAngle-MWAngle-np.pi))
 
 
 
 
 def angleOfLiftForceMW(state,trueWindAngle):
-	alpha              = angleOfAttackMW(state[0][0],trueWindAngle)
-	if alpha<=0:
-		return(wrapTo2pi(-alpha+(np.pi/2)))
+	alpha = angleOfAttackMW(state[0][0],trueWindAngle)
+	if alpha <= 0:
+		return(wrapTo2pi(trueWindAngle+(np.pi/2)))
 	else :
-		return(wrapTo2pi(-alpha-(np.pi/2)))
+		return(wrapTo2pi(trueWindAngle-(np.pi/2)))
 
 
 
 def aerodynamicForcesCFD(alpha,tailAngle):
-	liftForceMW = 200.162*alpha # experimental formula
+	""" The force are returned in the wind coordinate system we will use symetry for negative angles"""
+	liftForceMW = 200.162*abs(wrapTo2pi(alpha)) # experimental formula
 
-	liftForceSW = 17.677*(wrapTo2pi(alpha)) +0.219*wrapTo2pi(tailAngle) # experimental formula 
+	liftForceSW = 17.677*abs(wrapTo2pi(alpha)) +0.219*abs(wrapTo2pi(tailAngle)) # experimental formula 
 
-	dragForceMW = 101.086*(wrapTo2pi(alpha))
+	dragForceMW = -101.086*abs(wrapTo2pi(alpha))
 
-	dragForceSW = 15.42*(wrapTo2pi(alpha)) + 0.076*(tailAngle)
-
+	dragForceSW = -15.42*abs(wrapTo2pi(alpha)) - 0.076*abs(tailAngle)
+	if alpha < 0:
+		liftForceMW, liftForceSW = -liftForceMW, -liftForceSW
 	return (liftForceMW, liftForceSW, dragForceMW, dragForceSW)
 
 
 def aerodynamicForcesTheory(alpha,tailAngle):
-	liftForceMW = constPartWindForceMW*MWDesignedLiftCoefficient*alpha*5.91
+	liftForceMW = constPartWindForceMW*MWDesignedLiftCoefficient*abs(wrapTo2pi(alpha))*5.91
 	#print (constPartWindForceMW*MWDesignedLiftCoefficient*5.91)
 
-	liftForceSW = constPartWindForceSW*SWDesignedLiftCoefficient*wrapTo2pi(dontKnowHowToName*alpha-tailAngle)*5.91
+	liftForceSW = constPartWindForceSW*SWDesignedLiftCoefficient*abs(wrapTo2pi(dontKnowHowToName*alpha-tailAngle))*5.91
 	#print(5.91*constpartwindforcesw*swdesignedliftcoefficient, "wr", wrapto2pi(dontknowhowtoname*alpha))
 	dragForceMW = 0
 
 	dragForceSW = 0
-
+	if alpha < 0:
+		liftForceMW, liftForceSW = -liftForceMW, -liftForceSW
 	return (liftForceMW, liftForceSW, dragForceMW, dragForceSW)
-
-
 
 
 
@@ -148,35 +149,29 @@ def equationθpp(state, truewindAngle,positionAerodynamicCenter ='A', aerodynami
 	tailAngle  = state[2][0]
 	#print (tailAngle)
 	if aerodynamicForces == 'T':
-		liftForceMW,liftForceSW,dragForceMW,dragForceSW = aerodynamicForcesTheory(alpha,tailAngle)  
+		liftForceMW,liftForceSW,dragForceMW,dragForceSW = aerodynamicForcesTheory(alpha,tailAngle)
 	else:
-		liftForceMW,liftForceSW,dragForceMW,dragForceSW = aerodynamicForcesCFD(alpha,tailAngle)   
-	tailRelatedPartLift     = distanceTail*liftForceSW
-#	tailRelatedPartDrag     = 0
-#	MWRelatedPartDrag = 0
-#	Uncomment the following line to add drag to the similation
-	tailRelatedPartDrag     = dragForceSW
-	tailRelatedPart         = (tailRelatedPartLift*np.cos(alpha)-tailRelatedPartDrag*np.sin(alpha))/momentOfInertiaStructureOnMast
+		liftForceMW,liftForceSW,dragForceMW,dragForceSW = aerodynamicForcesCFD(alpha,tailAngle)
+
+	yMW_TailRelatedPart = liftForceSW*np.cos(alpha)-dragForceSW*np.sin(alpha)
+	xMW_TailRelatedPart = liftForceSW*np.sin(alpha)+dragForceSW*np.cos(alpha)
+	tailRelatedMoment   = yMW_TailRelatedPart*distanceTail
+	tailRelatedPart     = tailRelatedMoment/momentOfInertiaStructureOnMast
+
 	if positionAerodynamicCenter == 'O':
 		return(tailRelatedPart)
-	elif positionAerodynamicCenter == 'B':
-		MWRelatedPartLift   = distanceMWB*liftForceMW
-#		MWRelatedPartDrag   = 0
-#		Uncomment the following line to add drag to the similation
-		MWRelatedPartDrag   = distanceMWB*dragForceMW
-		MWRelatedPart       = (MWRelatedPartLift*np.cos(alpha)-MWRelatedPartDrag*np.sin(alpha))/momentOfInertiaStructureOnMast
+	else: 
+		yMW_MWRelatedPart = liftForceMW*np.cos(alpha)-dragForceMW*np.sin(alpha)
+		xMW_MWRelatedPart = liftForceMW*np.sin(alpha)+dragForceMW*np.cos(alpha)
+
+		if positionAerodynamicCenter =='A':
+		    MWRelatedMoment = yMW_MWRelatedPart*distanceMWA
+		else :
+			MWRelatedMoment = yMW_MWRelatedPart*distanceMWB
+
+		MWRelatedPart     = MWRelatedMoment/momentOfInertiaStructureOnMast
 		return(tailRelatedPart+MWRelatedPart)
-	elif positionAerodynamicCenter == 'A':
-		MWRelatedPartLift   = distanceMWA*liftForceMW
-#		MWRelatedPartDrag   = 0
-#		Uncomment the following line to add drag to the similation
-		MWRelatedPartDrag   = distanceMWA*dragForceMW
-		MWRelatedPart       = (MWRelatedPartLift*np.cos(alpha)-MWRelatedPartDrag*np.sin(alpha))/momentOfInertiaStructureOnMast
-		return(tailRelatedPart+MWRelatedPart)
-
-
-
-
+	
 
 
 
@@ -293,10 +288,11 @@ if __name__ == '__main__':
 		wingState[1][0] = wrapTo2pi(wingState[1][0])
 ##		print('main wing angle: ', wingState[0][0])
 ##		print('true wind angle: ', trueWindAngle)
-##		angleLift       = angleOfLiftForceMW(wingState,trueWindAngle)
-##		lift            = liftForceOnMW(wingState,trueWindAngle)
+		alpha = angleOfAttackMW(wingState[0],trueWindAngle)
+		lift, useless1,useless2,useless3  = aerodynamicForcesCFD(alpha, SWAngle)
+		angleLift       = angleOfLiftForceMW(wingState,trueWindAngle)
 ##		print(angleLift,lift)
-##		drawArrow(0, 0, angleLift, lift,'b')
+		drawArrow(0,0,angleLift,lift,'k')
 		drawWingSailIRT(wingState[0][0],wingState[2][0],trueWindAngle,trueWindSpeed)
 		drawHull(0)
 		plt.pause(0.0001)
@@ -304,10 +300,9 @@ if __name__ == '__main__':
 	"""
 
 
-
 	# ===== Equilibrium position in function of the position of the aerodynamic center (Theory forces) ===== #
 	
-	"""
+	
 	plt.figure()
 	timesRK2,statesRK2O = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle,'O')
 	drawWingSailAngle(timesRK2,statesRK2O[0,:],'on rot axis','RK2')
@@ -318,26 +313,29 @@ if __name__ == '__main__':
 	timesRK2,statesRK2A = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle)
 	drawWingSailAngle(timesRK2,statesRK2A[0,:],'after rot axis','RK2 (theoretical forces)')
 	plt.legend()
-	plt.savefig('Simulation_pics/Comparison position aerodynamic center for theoretical aerodynamic forces.png')
-	"""
+	plt.show()
+	
+	#plt.savefig('Simulation_pics/Comparison position aerodynamic center for theoretical aerodynamic forces.png')
+	
 	
 
 	# ==== Equilibrium position in function of the position of the aerodynamic center (Experimental forces) ===== #
 	
-	
+		
 	plt.figure()
 	timesRK2,statesRK2O = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'O','CFD')
 	print('on mast: ',statesRK2O[0][-1])
 	drawWingSailAngle(timesRK2,statesRK2O[0,:],'on rot axis','RK2')
-	"""
+	
 	timesRK2,statesRK2B = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'B','CFD')
 	drawWingSailAngle(timesRK2,statesRK2B[0,:],'before rot axis','RK2')
-	"""
+	
 	timesRK2,statesRK2A = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'A','CFD')
 	print('behind mast: ', statesRK2A[0][-1])
 	drawWingSailAngle(timesRK2,statesRK2A[0,:],'after rot axis','RK2 (experimental forces)')
 	plt.legend()
-	plt.savefig('Simulation_pics/Comparison position aerodynamic center for experimental aerodynamic forces2.png')
+	plt.show()
+	#plt.savefig('Simulation_pics/Comparison position aerodynamic center for experimental aerodynamic forces2.png')
 	
 	
 	# ===== Equilibrium position in function of the forces (aerodynamic center behind the mast) ===== #
