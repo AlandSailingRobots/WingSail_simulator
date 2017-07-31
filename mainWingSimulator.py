@@ -99,17 +99,20 @@ SWAngle               = wrapTo2pi(SWAngle)
 ####################################################################################################
 
 def angleOfAttackMW(MWAngle,trueWindAngle):
-	return(wrapTo2pi(trueWindAngle-MWAngle-np.pi))
+	return(-wrapTo2pi(trueWindAngle-MWAngle-np.pi))
 
 
 
 
 def angleOfLiftForceMW(state,trueWindAngle):
 	alpha = angleOfAttackMW(state[0][0],trueWindAngle)
+	print(alpha)
 	if alpha <= 0:
-		return(wrapTo2pi(trueWindAngle+(np.pi/2)))
+		print('-')
+		return(wrapTo2pi(trueWindAngle+np.pi/2))
 	else :
-		return(wrapTo2pi(trueWindAngle-(np.pi/2)))
+		print('+')
+		return(wrapTo2pi(trueWindAngle-np.pi/2))
 
 
 
@@ -268,7 +271,7 @@ def evolutionMWAngleForDifferentTailAngles(stop=300,trueWindAngle = 0, positionA
 
 if __name__ == '__main__':
 
-	"""
+	
 	dt                          = 0.01
 	t                           = 0
 	fig                         = plt.figure()
@@ -291,13 +294,13 @@ if __name__ == '__main__':
 		alpha = angleOfAttackMW(wingState[0],trueWindAngle)
 		lift, useless1,useless2,useless3  = aerodynamicForcesCFD(alpha, SWAngle)
 		angleLift       = angleOfLiftForceMW(wingState,trueWindAngle)
-##		print(angleLift,lift)
+		print(angleLift)
 		drawArrow(0,0,angleLift,lift,'k')
 		drawWingSailIRT(wingState[0][0],wingState[2][0],trueWindAngle,trueWindSpeed)
 		drawHull(0)
 		plt.pause(0.0001)
 	plt.show()
-	"""
+	
 
 
 	# ===== Equilibrium position in function of the position of the aerodynamic center (Theory forces) ===== #
@@ -321,7 +324,7 @@ if __name__ == '__main__':
 
 	# ==== Equilibrium position in function of the position of the aerodynamic center (Experimental forces) ===== #
 	
-		
+	"""	
 	plt.figure()
 	timesRK2,statesRK2O = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'O','CFD')	
 	drawWingSailAngle(timesRK2,statesRK2O[0,:],'on rot axis','RK2')
@@ -333,6 +336,7 @@ if __name__ == '__main__':
 	drawWingSailAngle(timesRK2,statesRK2A[0,:],'after rot axis','RK2 (experimental forces)')
 	plt.legend()
 	plt.show()
+	"""
 	#plt.savefig('Simulation_pics/Comparison position aerodynamic center for experimental aerodynamic forces2.png')
 	
 	
