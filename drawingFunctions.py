@@ -6,7 +6,8 @@ Created on Wed Jun 21 11:00:56 2017
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from angleFunctions import wrapTo2pi,degTorad,radTodeg
+from angleFunctions import wrapTo2pi,degTorad,radTodeg, listRadTodeg, listDegTorad, listWrapTo2pi
+
 
 
 """
@@ -58,19 +59,20 @@ def drawEquilibriumAngles(equilibriumAngles,ident='FDSA'):
 	plt.title(title.upper())
 	return()
 
-def drawEvolutionMWAngle(evolutionAngles,times,ident = 'FDSA'):
+def drawEvolutionMWAngle(evolutionAngles,times,wide,ident = 'FDSA'):
 	title = input("Enter title of Figure :")
 	if type(title) != str:
 		title =str(title) 
 	plt.figure()
-	if ident == 'FDTA':
+	if ident == 'FDTA':b
 		for i in range(len(evolutionAngles)):
-			plt.plot(times,evolutionAngles[i],label='TA= '+str(i-26))
+			
+			plt.plot(times,listRadTodeg(evolutionAngles[i][0,:]),label='TA= '+str(i+wide[0]))
 	else:
 		for i in range(len(evolutionAngles)):
-			plt.plot(times,evolutionAngles[i][0,:],label='SA= '+str(i-30))
+			plt.plot(times,listRadTodeg(evolutionAngles[i][0,:]),label='SA= '+str(i+wide[0]))
 	plt.legend(ncol = 4 ,fontsize = 4, )
-	plt.axis([0,times[-1]+10,-10,10])
+	plt.axis([0,times[-1]+10,-50,50])
 	plt.title(title.upper())
 	return()
 
@@ -92,8 +94,8 @@ def drawHull(heading):
 
 
 
-def drawWingSailIRT(theta, canardAngle, trueWindAngle, trueWindSpeed):
-	tailAngle = wrapTo2pi(-2*canardAngle)
+def drawWingSailIRT(theta, tailAngle, trueWindAngle, trueWindSpeed):
+	tailAngle = wrapTo2pi(tailAngle)
 	
 	mainWing               = np.array([[ 2, 0, -3,  0,  2],
 	                                   [ 0, 1,  0, -1,  0],
@@ -110,29 +112,29 @@ def drawWingSailIRT(theta, canardAngle, trueWindAngle, trueWindSpeed):
 	                                   [             0,              0,1]])
 #	print("canardAngle: ",canardAngle)
 #	print("tailAngle: ", tailAngle)
-	canardDeviation        = wrapTo2pi(theta+canardAngle)
+#	canardDeviation        = wrapTo2pi(theta+canardAngle)
 	tailDeviation          = wrapTo2pi(theta+tailAngle)
 	rotationMatrixTail     = np.array([[ np.cos(tailDeviation), -np.sin(tailDeviation),   -5.5*np.cos(theta)],
 	                                   [ np.sin(tailDeviation),  np.cos(tailDeviation),   -5.5*np.sin(theta)],
 	                                   [                     0,                      0,                    1]])
 
-	rotationMatrixCanard   = np.array([[ np.cos(canardDeviation), -np.sin(canardDeviation),    4.8*np.cos(theta)],
-	                                   [ np.sin(canardDeviation),  np.cos(canardDeviation),    4.8*np.sin(theta)],
-	                                   [                       0,                        0,                    1]])
+#	rotationMatrixCanard   = np.array([[ np.cos(canardDeviation), -np.sin(canardDeviation),    4.8*np.cos(theta)],
+#	                                   [ np.sin(canardDeviation),  np.cos(canardDeviation),    4.8*np.sin(theta)],
+#	                                   [                       0,                        0,                    1]])
 
 	mainWing               = rotationMatrixMainWing.dot(mainWing)
 	tail                   = rotationMatrixTail.dot(servoWing)
-	canard                 = rotationMatrixCanard.dot(servoWing)
+#	canard                 = rotationMatrixCanard.dot(servoWing)
 	plt.plot(mainWing[0,:],mainWing[1,:],'r')
 	plt.plot(tail[0,:],tail[1,:],'g')
-	plt.plot(canard[0,:],canard[1,:],'b')
+#	plt.plot(canard[0,:],canard[1,:],'b')
 	plt.plot(0,0,'r+')
 #	print('theta: ',theta)
 #	print('canardDeviation: ',canardDeviation)
 #	print('tailDeviation: ',tailDeviation)
 	plt.text(-11,13,'Wind:')
 	drawArrow(-9.0,10.0,trueWindAngle,trueWindSpeed,'k')
-	drawArrow(4.8*np.cos(theta),4.8*np.sin(theta),canardDeviation,1,'b')
+#	drawArrow(4.8*np.cos(theta),4.8*np.sin(theta),canardDeviation,1,'b')
 	drawArrow(-5.5*np.cos(theta),-5.5*np.sin(theta),tailDeviation,1,'g')
 
 

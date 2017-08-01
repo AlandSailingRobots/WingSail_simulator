@@ -17,6 +17,23 @@ def wrapTo2pi(theta):
 	theta = 2.0*np.arctan(np.tan(theta/2.0))
 	return(theta)
 
+def listWrapTo2pi(l):
+	u =[]
+	for i in l:
+		u.append(wrapTo2pi(i))
+	return(l)
+
+def listRadTodeg(l):
+	u=[]
+	for i in l:
+		u.append(radTodeg(i))
+	return(u)
+
+def listDegTorad(l):
+	u = []
+	for i in l:
+		u.append(degTorad(i))
+	return(l)
 """
 print(degTorad(5))
 print(degTorad(10))
