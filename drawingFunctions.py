@@ -64,7 +64,7 @@ def drawEvolutionMWAngle(evolutionAngles,times,wide,ident = 'FDSA'):
 	if type(title) != str:
 		title =str(title) 
 	plt.figure()
-	if ident == 'FDTA':b
+	if ident == 'FDTA':
 		for i in range(len(evolutionAngles)):
 			
 			plt.plot(times,listRadTodeg(evolutionAngles[i][0,:]),label='TA= '+str(i+wide[0]))
