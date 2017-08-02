@@ -87,7 +87,6 @@ momentOfInertiaStructureOnMast  = SWMass*distanceTail**2+MWMass*0.2**2
 print(momentOfInertiaStructureOnMast)
 
 
-angleMaxLiftCoeff     = degTorad(15)
 MWAngle               = float(input('Enter main wing angle in degrees:'))
 MWAngle               = wrapTo2pi(degTorad(MWAngle))
 dotMWAngle            = wrapTo2pi(degTorad(0))
@@ -148,7 +147,11 @@ def aerodynamicForcesTheory(alpha,tailAngle):
 		liftForceSW = -liftForceSW
 	return (liftForceMW, liftForceSW, dragForceMW, dragForceSW)
 
-
+def windCoordinatesToMWCoordinates(liftForce,dragForce,alpha):
+	y = liftForce*np.cos(alpha)-dragForce*np.sin(alpha)
+	x = liftForce*np.sin(alpha)+dragForce*np.cos(alpha)
+	return (x,y)
+	
 
 
 def equationθpp(state, truewindAngle,positionAerodynamicCenter ='A', aerodynamicForces = 'T' ):
@@ -160,14 +163,14 @@ def equationθpp(state, truewindAngle,positionAerodynamicCenter ='A', aerodynami
 	else:
 		liftForceMW,liftForceSW,dragForceMW,dragForceSW = aerodynamicForcesCFD(alpha,tailAngle)
 
-	print('lMW',liftForceMW, 'dMW',dragForceMW)
-	print('lSW',liftForceSW, 'dSW',dragForceSW)
-	yMW_TailRelatedPart = liftForceSW*np.cos(alpha)-dragForceSW*np.sin(alpha)
-	#xMW_TailRelatedPart = liftForceSW*np.sin(alpha)+dragForceSW*np.cos(alpha)
+	#print('lMW',liftForceMW, 'dMW',dragForceMW)
+	#print('lSW',liftForceSW, 'dSW',dragForceSW)
+	
+	xMW_TailRelatedPart,yMW_TailRelatedPart = windCoordinatesToMWCoordinates(liftForceSW,dragForceSW,alpha)
 	tailRelatedMoment   = yMW_TailRelatedPart*distanceTail
-	print('moment tail',tailRelatedMoment) 
+	#print('moment tail',tailRelatedMoment) 
 	tailRelatedPart     = tailRelatedMoment/momentOfInertiaStructureOnMast
-	print('tail part',tailRelatedPart) 
+	#print('tail part',tailRelatedPart) 
 	if positionAerodynamicCenter == 'O':
 		return(tailRelatedPart)
 	else: 
@@ -175,12 +178,12 @@ def equationθpp(state, truewindAngle,positionAerodynamicCenter ='A', aerodynami
 		#xMW_MWRelatedPart = liftForceMW*np.sin(alpha)+dragForceMW*np.cos(alpha)
 
 		if positionAerodynamicCenter =='A':
-		    MWRelatedMoment = yMW_MWRelatedPart*distanceMWA
+			MWRelatedMoment = yMW_MWRelatedPart*distanceMWA
 		else :
 			MWRelatedMoment = yMW_MWRelatedPart*distanceMWB
-		print('moment MW',MWRelatedMoment)
+		#print('moment MW',MWRelatedMoment)
 		MWRelatedPart     = MWRelatedMoment/momentOfInertiaStructureOnMast
-		print('part MW',MWRelatedPart)
+		#print('part MW',MWRelatedPart)
 		#print('tailRelatedPart: ',tailRelatedPart,'MWRelatedPart: ', MWRelatedPart)
 		return(tailRelatedPart+MWRelatedPart)
 	
@@ -249,10 +252,9 @@ def evolutionMWAngleForDifferentStartAngles(wide = (-30,-19),stop = 200,trueWind
 def equilibriumAngleForDifferentTailAngles(stop = 200, trueWindAngle = 0, positionAerodynamicCenter = 'A', aerodynamicForces = 'T'):
 	equilibriumAnglesFDTA = [] #FDTA = ForDifferentTailAngles
 	for i in range (-maxTailAngle,maxTailAngle+1):
-		print(i)
 		state        = [0]*3
 		state[2]     = wrapTo2pi(degTorad(i))
-		state         = np.array([state])
+		state        = np.array([state])
 		state        = state.reshape((3,1))
 		startTime    = 0
 		stopTime     = stop
@@ -285,7 +287,7 @@ def evolutionMWAngleForDifferentTailAngles(wide = (-26,-15), stop = 300,trueWind
 
 if __name__ == '__main__':
 
-	
+	"""
 	dt                          = 0.01
 	t                           = 0
 	fig                         = plt.figure()
@@ -306,31 +308,36 @@ if __name__ == '__main__':
 ##		print('main wing angle: ', wingState[0][0])
 ##		print('true wind angle: ', trueWindAngle)
 		alpha                             = angleOfAttackMW(wingState[0],trueWindAngle)
-		lift, useless1,useless2,useless3  = aerodynamicForcesCFD(alpha, SWAngle)
-		angleLift                         = angleOfLiftForceMW(wingState,trueWindAngle)
-		print(radTodeg(angleLift), lift)
-		drawArrow(0,0,angleLift,lift/5,'k')
+		liftMW, useless1,dragMW,useless3  = aerodynamicForcesCFD(alpha, SWAngle)
+		angleTotalForceMW                 = float(np.arctan2(liftMW,dragMW))
+		moduleTotalForceMW                = float(np.sqrt(liftMW**2+dragMW**2))
+		#print(radTodeg(angleLift), lift)
+		drawArrow(0,0,angleTotalForceMW,moduleTotalForceMW,'k')
 		drawWingSailIRT(wingState[0][0],wingState[2][0],trueWindAngle,trueWindSpeed)
 		drawHull(0)
 		plt.pause(0.0001)
 	plt.show()
-	
+	"""
 
 
 	# ===== Equilibrium position in function of the position of the aerodynamic center (Theory forces) ===== #
 	
 	
 	#plt.figure()
-	"""
-	timesRK2,statesRK2O = rk2Scheme(wingState,0,00, 0.01, evolution, trueWindAngle,'O')
+	
+	timesRK2,statesRK2O = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle,'O')
 	anglesInDegreesRK2O = listRadTodeg(statesRK2O[0,:])
 	drawWingSailAngle(timesRK2,anglesInDegreesRK2O,'on rot axis','RK2')
-	"""
+	
 	"""
 	timesRK2,statesRK2B = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle,'B')
 	anglesInDegreesRK2B = listRadTodeg(statesRK2B[0,:])
 	drawWingSailAngle(timesRK2,anglesInDegreesRK2B,'before rot axis','RK2')
 	"""
+	"""
+	timesEuler,statesEulerA = eulerScheme(wingState,0,300,0.01,evolution,trueWindAngle)
+	anglesInDegreesEulerA = listRadTodeg(statesEulerA[0,:])
+	drawWingSailAngle(timesEuler,anglesInDegreesEulerA,'euler','fds')
 	"""
 	timesRK2,statesRK2A = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle)
 	anglesInDegreesRK2A = listRadTodeg(statesRK2A[0,:])
@@ -338,7 +345,7 @@ if __name__ == '__main__':
 	
 	plt.legend()
 	plt.show()
-	"""
+	
 	#plt.savefig('Simulation_pics/Comparison position aerodynamic center for theoretical aerodynamic forces.png')
 	
 	
