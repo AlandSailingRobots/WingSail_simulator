@@ -528,7 +528,8 @@ if __name__ == '__main__':
 
     #In wind coordinate system : 
     angles , lifts, drags = lift_dragInfunctionOfAlpha()
-
+    
+    
     #apparent wind angle in boat coordinate system
     phi = int(input('Give angle of the apparent wind in the boat coordinate system: ')) 
     phi = wrapTo2pi(degTorad(phi))
