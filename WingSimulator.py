@@ -125,9 +125,9 @@ def aerodynamicForcesCFD(alpha,tailAngle):
     dragForceMW = -101.086*abs(wrapTo2pi(alpha))
 
     dragForceSW = -10.18*abs(wrapTo2pi(alpha)) - 4.54*abs(tailAngle)
-    if alpha < 0:
+    if alpha > 0:
         liftForceMW = -liftForceMW
-    if wrapTo2pi(alpha+tailAngle) < 0:
+    if wrapTo2pi(alpha+tailAngle) > 0:
         liftForceSW = -liftForceSW
     return (liftForceMW, liftForceSW, dragForceMW, dragForceSW)
 
@@ -141,12 +141,14 @@ def aerodynamicForcesTheory(alpha,tailAngle):
     dragForceMW = -constPartWindForceMW*MWDesignedLiftCoefficient*abs(wrapTo2pi(alpha))**2*5.91/2
 
     dragForceSW = -constPartWindForceSW*SWDesignedLiftCoefficient*abs(wrapTo2pi(dontKnowHowToName*alpha-tailAngle))**2*5.91/2
+    
     if alpha > 0:
         #print(alpha)
         liftForceMW= -liftForceMW
-    if wrapTo2pi(alpha+tailAngle) > 0:
+    if wrapTo2pi(alpha-tailAngle) > 0:
         #print(alpha+tailAngle)
         liftForceSW = -liftForceSW
+    
     return (liftForceMW, liftForceSW, dragForceMW, dragForceSW)
 
 def windCoordinatesToMWCoordinates(liftForce,dragForce,alpha):
@@ -345,13 +347,13 @@ if __name__ == '__main__':
 
     # ===== Equilibrium position in function of the position of the aerodynamic center (Theory forces) ===== #
     
-    """
+    
     #plt.figure()
     
     timesRK2,statesRK2O = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle,'O')
     anglesInDegreesRK2O = listRadTodeg(statesRK2O[0,:])
     drawWingSailAngle(timesRK2,anglesInDegreesRK2O,'on rot axis','RK2')
-    """
+    
     
     """
     timesRK2,statesRK2B = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle,'B')
@@ -365,14 +367,14 @@ if __name__ == '__main__':
     anglesInDegreesEulerA = listRadTodeg(statesEulerA[0,:])
     drawWingSailAngle(timesEuler,anglesInDegreesEulerA,'euler','fds')
     """
-    """
+    
     timesRK2,statesRK2A = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle)
     anglesInDegreesRK2A = listRadTodeg(statesRK2A[0,:])
     drawWingSailAngle(timesRK2,anglesInDegreesRK2A,'after rot axis','RK2 (theoretical forces)')
     
     plt.legend()
     plt.show()
-    """
+    
     #plt.savefig('Simulation_pics/Comparison position aerodynamic center for theoretical aerodynamic forces.png')
     
     
@@ -525,10 +527,11 @@ if __name__ == '__main__':
     plt.show()
     """
     # =====  calculate best orientation for main wing ===== #
-
+    """
     #In wind coordinate system : 
     angles , lifts, drags = lift_dragInfunctionOfAlpha()
-    
+    print("lifts: ", lifts)
+    print("drags: ", drags)
     
     #apparent wind angle in boat coordinate system
     phi = int(input('Give angle of the apparent wind in the boat coordinate system: ')) 
@@ -584,5 +587,5 @@ if __name__ == '__main__':
     print('Control MW angle: ' , UMWAngle)
     print('control tail angle: ', Utail)
     plt.show()
-    
+    """
     
