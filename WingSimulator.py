@@ -23,15 +23,14 @@ import matplotlib.pyplot as plt
 def reynolds(Speed,Lcarac,nu):
     return(Speed*Lcarac/nu)
 
-"""
-UNCOMMENT MAIN BLOC AT THE END OF THE FILE FOR TESTS
-"""
+
 
 
 
 X = 2
 
 """Constants"""
+global trueWindAngle
 trueWindAngle              = float(input('Enter true wind angle angle in degrees:'))
 trueWindAngle              = wrapTo2pi(degTorad(trueWindAngle))
 trueWindSpeed              = 7
@@ -193,7 +192,7 @@ def equationθpp(state, truewindAngle,positionAerodynamicCenter ='A', aerodynami
     
 
 
-
+global wingState
 wingState = np.array([MWAngle,dotMWAngle,SWAngle])
 wingState = wingState.reshape((3,1))
 #print(wingState)
@@ -310,282 +309,9 @@ def lift_dragInfunctionOfAlpha():
 
 
 
-if __name__ == '__main__':
-
-    """
-    dt                          = 0.01
-    t                           = 0
-    fig                         = plt.figure()
-    positionOfAerodynamicCenter = (str(input('Enter position of aerodynamic center B/O/A:'))).upper()
-    aerodynamicForces           = (str(input('Enter type of aerodynamic forces   (theory)T/CFD:'))).upper()
-    ax                          = fig.add_subplot(111, aspect ='equal')
-    while t+dt <=1700:
-        t                                 = t+dt
-        plt.cla()
-        ax.set_xlim(-15,15)
-        ax.set_ylim(-15,15)
-##      print(t)
-##      wingState = wingState + dt*evolution(wingState,1)
-##      wingState[0],wingState[1] = wrapTo2pi(wingState[0]),wrapTo2pi(wingState[1]
-        wingState                         = wingState + dt*rk2Step(wingState,t,dt,evolution,trueWindAngle,positionOfAerodynamicCenter)
-        wingState[0][0]                   = wrapTo2pi(wingState[0][0])
-        wingState[1][0]                   = wrapTo2pi(wingState[1][0])
-##      print('main wing angle: ', wingState[0][0])
-##      print('true wind angle: ', trueWindAngle)
-        alpha                             = angleOfAttackMW(wingState[0],trueWindAngle)
-        liftMW, useless1,dragMW,useless3  = aerodynamicForcesTheory(alpha, SWAngle)
-        angleTotalForceMW                 = float(np.arctan2(liftMW,dragMW))
-        moduleTotalForceMW                = float(np.sqrt(liftMW**2+dragMW**2))
-        #print(radTodeg(angleLift), lift)
-        drawArrow(0,0,angleTotalForceMW,moduleTotalForceMW,'k')
-        drawWingSailIRT(wingState[0][0],wingState[2][0],trueWindAngle,trueWindSpeed)
-        drawHull(0)
-        plt.pause(0.0001)
-    plt.show()
-    """
-
-
-    # ===== Equilibrium position in function of the position of the aerodynamic center (Theory forces) ===== #
-    
-    
-    #plt.figure()
-    
-    timesRK2,statesRK2O = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle,'O')
-    anglesInDegreesRK2O = listRadTodeg(statesRK2O[0,:])
-    drawWingSailAngle(timesRK2,anglesInDegreesRK2O,'on rot axis','RK2')
-    
-    
-    """
-    timesRK2,statesRK2B = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle,'B')
-    anglesInDegreesRK2B = listRadTodeg(statesRK2B[0,:])
-    drawWingSailAngle(timesRK2,anglesInDegreesRK2B,'before rot axis','RK2')
-    """
-
-    
-    """
-    timesEuler,statesEulerA = eulerScheme(wingState,0,300,0.01,evolution,trueWindAngle)
-    anglesInDegreesEulerA = listRadTodeg(statesEulerA[0,:])
-    drawWingSailAngle(timesEuler,anglesInDegreesEulerA,'euler','fds')
-    """
-    
-    timesRK2,statesRK2A = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle)
-    anglesInDegreesRK2A = listRadTodeg(statesRK2A[0,:])
-    drawWingSailAngle(timesRK2,anglesInDegreesRK2A,'after rot axis','RK2 (theoretical forces)')
-    
-    plt.legend()
-    plt.show()
-    
-    #plt.savefig('Simulation_pics/Comparison position aerodynamic center for theoretical aerodynamic forces.png')
-    
+   
     
 
-    # ==== Equilibrium position in function of the position of the aerodynamic center (Experimental forces) ===== #
-    
-    """
-    plt.figure()
-    timesRK2,statesRK2O = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'O','CFD')  
-    anglesInDegreesRK20 = listRadTodeg(statesRK2O[0,:])
-    drawWingSailAngle(timesRK2,anglesInDegreesRK20,'on rot axis','RK2')
-    """
-    
-    """
-    timesRK2,statesRK2B = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'B','CFD')
-    anglesInDegreesRK2B = listRadTodeg(statesRK2B[0,:])
-    drawWingSailAngle(timesRK2,anglesInDegreesRK2B,'before rot axis','RK2')
-    """
-    
-    """
-    timesRK2,statesRK2A = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'A','CFD')
-    anglesInDegreesRK2A = listRadTodeg(statesRK2A[0,:])
-    drawWingSailAngle(timesRK2,anglesInDegreesRK2A,'after rot axis','RK2 (experimental forces)')
-    plt.legend()
-    plt.show()
-    """
-    
-    """
-    #plt.savefig('Simulation_pics/Comparison position aerodynamic center for experimental aerodynamic forces2.png')
-    """
 
-
-    
-    # ===== Equilibrium position in function of the forces (aerodynamic center behind the mast) ===== #
-
-    """
-    plt.figure()
-    timesRK2,statesRK2A = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'A','CFD')
-    drawWingSailAngle(timesRK2,statesRK2A[0,:],'experimental forces','RK2')
-    timesRK2,statesRK2A = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle)
-    drawWingSailAngle(timesRK2,statesRK2A[0,:],'theoretical forces','RK2')
-     plt.legend()
-    plt.savefig('Simulation_pics/Comparison type of forces aerodynamic center behind the mast.png')
-    """
-
-
-
-    # ===== Evolution of the MW angle for different Start angles ===== #
-    """
-    wide = (-9,1)
-    evolutionAnglesFDSA,times, wide = evolutionMWAngleForDifferentStartAngles(wide,200,trueWindAngle,'A', 'T') 
-    drawEvolutionMWAngle(evolutionAnglesFDSA,times,wide)
-    plt.show()
-    #plt.savefig('Simulation_pics/evolution of main wing angles for different start angles theoretical forces_aerodynamic center behind the mast')
-    """
-    
-    """
-    wide = (11,21)
-    evolutionAnglesFDSA, times, wide = evolutionMWAngleForDifferentStartAngles(wide,200,trueWindAngle,'A', 'CFD') 
-    drawEvolutionMWAngle(evolutionAnglesFDSA,times,wide)
-    plt.show()
-    """
-    
-    #plt.savefig('Simulation_pics/evolution of main wing angles for different start angles experimental forces_aerodynamic center behind the mast')
-
-
-    
-    # ===== Equilibrium position for different Start angles ===== #
-
-    # Warning!! run the previous section before in order to put a reasonnable stop point
-    
-    """
-    equilibriumAnglesFDSA  = equilibriumAngleForDifferentStartAngles(200,trueWindAngle,'A','T')
-    drawEquilibriumAngles( equilibriumAnglesFDSA)
-    plt.savefig('Simulation_pics/equilibrium angles for different start angles theoretical forces_aerodynamic center behind the mast.png')
-    """
-    
-    """
-    equilibriumAnglesFDSA  = equilibriumAngleForDifferentStartAngles(200,trueWindAngle,'A','CFD')
-    drawEquilibriumAngles( equilibriumAnglesFDSA)
-    plt.savefig('Simulation_pics/equilibrium angles for different start angles experimental forces_aerodynamic center behind the mast.png')
-    """
-
-
-    
-    # =====  Evolution of the MW angle for different tail angles ===== #
-
-    """
-    wide = (-14,0) 
-    evolutionAnglesFDTA,times, wide = evolutionMWAngleForDifferentTailAngles(wide, 200,trueWindAngle,'A', 'T') 
-    drawEvolutionMWAngle(evolutionAnglesFDTA,times, wide,'FDTA')
-    plt.show()
-    """
-    
-    #plt.savefig('Simulation_pics/evolution of main wing angles for different tail  angles theoretical forces_aerodynamic center behind the mast')
-    
-
-    """
-    wide = (-14,0)
-    evolutionAnglesFDTA,times, wide = evolutionMWAngleForDifferentTailAngles(wide, 200,trueWindAngle,'A', 'CFD') 
-    drawEvolutionMWAngle(evolutionAnglesFDTA,times,wide,'FDTA')
-    plt.show()
-    """
-    #plt.savefig('Simulation_pics/evolution of main wing angles for different tail angles experimental forces_aerodynamic center behind the mast')
-    
-
-    
-    # ===== Equilibrium position for different servo wing angles (start at 0) ===== #
-
-    """
-    plt.figure()
-    equilibriumAnglesFDTA = equilibriumAngleForDifferentTailAngles(200,trueWindAngle,'A','T')
-    drawEquilibriumAngles( equilibriumAnglesFDTA,'FDTA')
-    plt.savefig('Simulation_pics/equilibrium angles for different tail angles theoretical forces_aerodynamic center behind the mast.png')
-    """
-
-    # ===== Lift force on main wing in function of the angle of attack ===== #
-    """
-    #In wind coordinate system : 
-    angles , lifts, drags = lift_dragInfunctionOfAlpha()
-    
-    #print(lifts,drags)
-    print(angles)
-    # in MW coordinate system
-    xMW_forces, yMW_forces = [], []
-    for i in range (len(angles)):
-        Xforce, Yforce = apparentWindCoordinatesToMWCoordinates(drags[i], lifts[i], degTorad(angles[i]))
-        xMW_forces.append(Xforce)
-        yMW_forces.append(Yforce)
-    plt.figure()
-    plt.plot(angles,xMW_forces,label='xMW_force')
-    plt.plot(angles,yMW_forces,label='yMW_force')
-    plt.legend()
-    #print(xMW_forces,yMW_forces)
-    
-    
-    # in boat coordinate system
-    MWAngle = int(input('Angle main wing: '))
-    xBoat_forces, yBoat_forces = [], []
-    for i in range (len(xMW_forces)):
-        Xforce, Yforce = apparentWindCoordinatesToMWCoordinates(xMW_forces[i], yMW_forces[i], MWAngle)
-        xBoat_forces.append(Xforce)
-        yBoat_forces.append(Yforce)
-    plt.figure()
-    plt.plot(angles,xBoat_forces,label='xBoat_force')
-    plt.plot(angles,yBoat_forces,label='yBoat_force')
-    plt.legend()
-    plt.title('forces in Boat coordinate system with a MW angle of ' + str(MWAngle)+'°')
-
-    plt.show()
-    """
-    # =====  calculate best orientation for main wing ===== #
-    """
-    #In wind coordinate system : 
-    angles , lifts, drags = lift_dragInfunctionOfAlpha()
-    print("lifts: ", lifts)
-    print("drags: ", drags)
-    
-    #apparent wind angle in boat coordinate system
-    phi = int(input('Give angle of the apparent wind in the boat coordinate system: ')) 
-    phi = wrapTo2pi(degTorad(phi))
-
-    # calculating forces in boat coordinate system
-    xBoat_forces,yBoat_forces = [],[]
-    for i in range(len(lifts)):
-        xBoat_force = drags[i]*np.cos(phi)-lifts[i]*np.sin(phi)
-        yBoat_force = lifts[i]*np.cos(phi)+drags[i]*np.sin(phi)
-        xBoat_forces.append(xBoat_force)
-        yBoat_forces.append(yBoat_force)
-
-    maxi_xForce = max(xBoat_forces)
-    index_maxi  = xBoat_forces.index(maxi_xForce)
-    print('maxi_xForce: ', maxi_xForce)
-    print('index_maxi: ', index_maxi-26) # best angle of attack in degrees if we want max(xForce)
-    
-    plt.figure()
-    plt.plot(angles,xBoat_forces,label = 'xboat_force')
-    plt.plot(angles,yBoat_forces,label = 'yboat_force')
-    plt.legend()
-    
-    # calculate the thrust/drift ratio
-    xForcesOnyForces = []
-    for i in range (len(xBoat_forces)):
-        if yBoat_forces[i] !=0:
-            xOny = xBoat_forces[i]/abs(yBoat_forces[i]) # if x < 0 useless because it pushes the boat backwards
-            xForcesOnyForces.append(xOny)
-        else:
-            xForcesOnyForces.append(0)
-
-    maxi_xOny_ratio = max(xForcesOnyForces)
-    index_maxi_xOny = xForcesOnyForces.index(maxi_xOny_ratio)
-    maxi_xOny       = xBoat_forces[index_maxi_xOny]
-
-    print('maxi_xOny: ',maxi_xOny)
-    print('index_maxi_xOny: ', index_maxi_xOny-26) # best angle of attack if we want the greatest thrust/drift ratio
-    
-    plt.figure ()
-    plt.plot(angles, xForcesOnyForces, label = 'xForcesOnyForces')
-    plt.legend()
-
-    # return best angle to go where we want
-    
-    minXforce = 2 # newtons
-    MWDeviation = index_maxi_xOny-26 # degrees
-    if maxi_xOny < minXforce :
-        MWDeviation = index_maxi-26
-
-    UMWAngle = radTodeg(phi) -  MWDeviation #degrees, best angle for the main wing
-    Utail    = MWDeviation                  # command in degrees to give to the tail
-    print('Control MW angle: ' , UMWAngle)
-    print('control tail angle: ', Utail)
-    plt.show()
-    """
+ 
     
