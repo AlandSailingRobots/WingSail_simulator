@@ -11,6 +11,10 @@ Note:
 - SW = servoWing
 - CL = lift coefficient
 - CD = drag coefficient
+- A  = after the mast 
+- B  = before the mast
+- O  = on the mast
+- T  = theory 
 - uppercase variable names are often abbreviation of the function used to calculate it
 """
 
@@ -103,6 +107,7 @@ SWAngle               = wrapTo2pi(degTorad(SWAngle))
 ####################################################################################################
 
 def angleOfAttackMW(MWAngle,trueWindAngle):
+    """ return the angle of attack of the main wing"""
     #print(MWAngle,trueWindAngle)
     return(wrapTo2pi(trueWindAngle-MWAngle-np.pi))
 
@@ -116,7 +121,8 @@ def angleOfLiftForceMW(state,trueWindAngle):
 
 
 def aerodynamicForcesCFD(alpha,tailAngle):
-    """ The force are returned in the wind coordinate system we will use symetry for negative angles"""
+    """ Calculate the lift and the drag with the CFD model. The force are returned in the wind coordinate 
+    system we will use symetry for negative angles"""
     liftForceMW = 200.162*abs(wrapTo2pi(alpha)) # experimental formula
 
     liftForceSW = 17.677*abs(wrapTo2pi(alpha)) +12.67*abs(wrapTo2pi(tailAngle)) # experimental formula 
@@ -132,6 +138,8 @@ def aerodynamicForcesCFD(alpha,tailAngle):
 
 
 def aerodynamicForcesTheory(alpha,tailAngle):
+    """ Calculate the lift and the drag with the theory model. The force are returned in the wind coordinate 
+    system we will use symetry for negative angles"""
     liftForceMW = constPartWindForceMW*MWDesignedLiftCoefficient*abs(wrapTo2pi(alpha))*5.91
     #print (constPartWindForceMW*MWDesignedLiftCoefficient*5.91)
 
@@ -157,6 +165,7 @@ def windCoordinatesToMWCoordinates(liftForce,dragForce,alpha):
     
 
 def equationθpp(state, truewindAngle,positionAerodynamicCenter ='A', aerodynamicForces = 'T' ):
+    """ this functions return the result of the equation you can find in the PDF file Wingsail_physics """
     alpha      = angleOfAttackMW(state[0][0],truewindAngle)
     #print(alpha)
     tailAngle  = state[2][0]
@@ -251,7 +260,7 @@ def evolutionMWAngleForDifferentStartAngles(wide = (-30,-19),stop = 200,trueWind
 
 
 
-""" Results will mean nothing until the problem of how to implement angles is fixed """
+
 def equilibriumAngleForDifferentTailAngles(stop = 200, trueWindAngle = 0, positionAerodynamicCenter = 'A', aerodynamicForces = 'T'):
     equilibriumAnglesFDTA = [] #FDTA = ForDifferentTailAngles
     for i in range (-maxTailAngle,maxTailAngle+1):
@@ -268,7 +277,7 @@ def equilibriumAngleForDifferentTailAngles(stop = 200, trueWindAngle = 0, positi
         equilibriumAnglesFDSWA.append(np.mean(states))
     return(equilibriumAnglesFDSWA)
 
-# Needs to be fixed
+
 def evolutionMWAngleForDifferentTailAngles(wide = (-26,-15), stop = 300,trueWindAngle = 0, positionAerodynamicCenter = 'A', aerodynamicForces = 'T'):
     evolutionAnglesFDTA = [] #FDSA = ForDifferentStartAngles
     times = []

@@ -13,7 +13,9 @@ from angleFunctions import wrapTo2pi,degTorad,radTodeg, listRadTodeg, listDegTor
 """
 UNCOMMENT MAIN BLOC AT THE END OF THE FILE FOR TESTS
 """
-
+""" 
+This module regroups functions for display
+"""
 
 def drawArrow(x,y,θ,L,color):
     e=0.2
@@ -110,31 +112,24 @@ def drawWingSailIRT(theta, tailAngle, trueWindAngle, trueWindSpeed):
     rotationMatrixMainWing = np.array([[ np.cos(theta), -np.sin(theta),0],
                                        [ np.sin(theta),  np.cos(theta),0],
                                        [             0,              0,1]])
-#   print("canardAngle: ",canardAngle)
-#   print("tailAngle: ", tailAngle)
-#   canardDeviation        = wrapTo2pi(theta+canardAngle)
+
     tailDeviation          = wrapTo2pi(theta+tailAngle)
     rotationMatrixTail     = np.array([[ np.cos(tailDeviation), -np.sin(tailDeviation),   -5.5*np.cos(theta)],
                                        [ np.sin(tailDeviation),  np.cos(tailDeviation),   -5.5*np.sin(theta)],
                                        [                     0,                      0,                    1]])
 
-#   rotationMatrixCanard   = np.array([[ np.cos(canardDeviation), -np.sin(canardDeviation),    4.8*np.cos(theta)],
-#                                      [ np.sin(canardDeviation),  np.cos(canardDeviation),    4.8*np.sin(theta)],
-#                                      [                       0,                        0,                    1]])
+
 
     mainWing               = rotationMatrixMainWing.dot(mainWing)
     tail                   = rotationMatrixTail.dot(servoWing)
-#   canard                 = rotationMatrixCanard.dot(servoWing)
+
     plt.plot(mainWing[0,:],mainWing[1,:],'r')
     plt.plot(tail[0,:],tail[1,:],'g')
-#   plt.plot(canard[0,:],canard[1,:],'b')
+
     plt.plot(0,0,'r+')
-#   print('theta: ',theta)
-#   print('canardDeviation: ',canardDeviation)
-#   print('tailDeviation: ',tailDeviation)
+
     plt.text(-11,13,'Wind:')
     drawArrow(-9.0,10.0,trueWindAngle,trueWindSpeed,'k')
-#   drawArrow(4.8*np.cos(theta),4.8*np.sin(theta),canardDeviation,1,'b')
     drawArrow(-5.5*np.cos(theta),-5.5*np.sin(theta),tailDeviation,1,'g')
 
 

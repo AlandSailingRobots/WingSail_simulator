@@ -10,12 +10,13 @@ UNCOMMENT MAIN BLOC AT THE END OF THE FILE FOR TESTS
 
 
 def simulate_IRT():
+    """ This function draws the state of the wing sail in real time """
     global wingState  
     global trueWindAngle  
-    dt                          = 0.01
-    t                           = 0
+    dt                          = 0.01 # step size for numerical integration
+    t                           = 0    # start time 
     fig                         = plt.figure()
-    positionOfAerodynamicCenter = (str(input('Enter position of aerodynamic center B/O/A:'))).upper()
+    positionOfAerodynamicCenter = (str(input('Enter position of aerodynamic center B/O/A:'))).upper() 
     aerodynamicForces           = (str(input('Enter type of aerodynamic forces   (theory)T/CFD:'))).upper()
     ax                          = fig.add_subplot(111, aspect ='equal')
     while t+dt <=1700:
@@ -23,21 +24,24 @@ def simulate_IRT():
         plt.cla()
         ax.set_xlim(-15,15)
         ax.set_ylim(-15,15)
-##      print(t)
-##      wingState = wingState + dt*evolution(wingState,1)
-##      wingState[0],wingState[1] = wrapTo2pi(wingState[0]),wrapTo2pi(wingState[1]
         wingState                         = wingState + dt*rk2Step(wingState,t,dt,evolution,trueWindAngle,positionOfAerodynamicCenter)
         wingState[0][0]                   = wrapTo2pi(wingState[0][0])
         wingState[1][0]                   = wrapTo2pi(wingState[1][0])
-##      print('main wing angle: ', wingState[0][0])
-##      print('true wind angle: ', trueWindAngle)
         alpha                             = angleOfAttackMW(wingState[0],trueWindAngle)
-        liftMW, useless1,dragMW,useless3  = aerodynamicForcesTheory(alpha, SWAngle)
+
+        # We need the lift and the drag on the main wing to draw the resulstant of the force 
+        liftMW, useless1,dragMW,useless3  = aerodynamicForcesTheory(alpha, SWAngle) 
+
+        # calculating the angle of the resultant
         angleTotalForceMW                 = float(np.arctan2(liftMW,dragMW))
+        # calculating the module of the resultant
         moduleTotalForceMW                = float(np.sqrt(liftMW**2+dragMW**2))
-        #print(radTodeg(angleLift), lift)
+
+        # drawing resultant
         drawArrow(0,0,angleTotalForceMW,moduleTotalForceMW,'k')
+        # drawing the wing sail
         drawWingSailIRT(wingState[0][0],wingState[2][0],trueWindAngle,trueWindSpeed)
+        # drawing a fake hull for display
         drawHull(0)
         plt.pause(0.0001)
     plt.show()
@@ -49,18 +53,24 @@ def simulate_IRT():
 
 
 def calculationsTheoryForces():
+    """ This functions is here to allow automatic tests of the wing sail with different center 
+    of pressure postition with the forces of the model obtained with theory. You obtain a curve with the evolution of the angle of the main wing in the hull 
+    coordinate system""" 
     global wingState
     global trueWindAngle 
     plt.figure()
 
+    # center of pressure on the mast
     timesRK2,statesRK2O = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle,'O')
     anglesInDegreesRK2O = listRadTodeg(statesRK2O[0,:])
     drawWingSailAngle(timesRK2,anglesInDegreesRK2O,'on rot axis','RK2')
        
+    # center of pressure before the mast   
     timesRK2,statesRK2B = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle,'B')
     anglesInDegreesRK2B = listRadTodeg(statesRK2B[0,:])
     drawWingSailAngle(timesRK2,anglesInDegreesRK2B,'before rot axis','RK2')
 
+    #  center of pressure after the mast
     timesRK2,statesRK2A = rk2Scheme(wingState,0,300, 0.01, evolution, trueWindAngle)
     anglesInDegreesRK2A = listRadTodeg(statesRK2A[0,:])
     drawWingSailAngle(timesRK2,anglesInDegreesRK2A,'after rot axis','RK2 (theoretical forces)')
@@ -73,19 +83,24 @@ def calculationsTheoryForces():
 # ==== Equilibrium position in function of the position of the aerodynamic center (Experimental forces) ===== #
 
 def calculationsCFDForces():
+    """ This function is here to allow automatic tests of the wing sail with different center 
+    of pressure postition with the forces of the model obtained with CFD. You obtain a curve with the evolution of the angle of the main wing in the hull 
+    coordinate system""" 
     global wingState
     global trueWindAngle 
     plt.figure()
-
+    
+    # center of pressure on the mast
     timesRK2,statesRK2O = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'O','CFD')  
     anglesInDegreesRK20 = listRadTodeg(statesRK2O[0,:])
     drawWingSailAngle(timesRK2,anglesInDegreesRK20,'on rot axis','RK2')
     
+    # center of pressure before the mast 
     timesRK2,statesRK2B = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'B','CFD')
     anglesInDegreesRK2B = listRadTodeg(statesRK2B[0,:])
     drawWingSailAngle(timesRK2,anglesInDegreesRK2B,'before rot axis','RK2')
     
-    
+    #  center of pressure after the mast
     timesRK2,statesRK2A = rk2Scheme(wingState,0,200, 0.01, evolution, trueWindAngle,'A','CFD')
     anglesInDegreesRK2A = listRadTodeg(statesRK2A[0,:])
     drawWingSailAngle(timesRK2,anglesInDegreesRK2A,'after rot axis','RK2 (experimental forces)')
@@ -98,6 +113,8 @@ def calculationsCFDForces():
 # ===== Evolution of the MW angle for different Start angles ===== #
 
 def calculationsEvolutionForDifferentStartAngles(wide = (-10,10), positionOfAerodynamicCenter = 'A',forcesType ='T'):
+    """ This function calculates the evolution of the main wing angle in function of the angle you have at the start at the simulation
+    mainly used to check stability"""
     global trueWindAngle 
     evolutionAnglesFDSA,times, wide = evolutionMWAngleForDifferentStartAngles(wide,200,trueWindAngle,positionOfAerodynamicCenter, forcesType) 
     drawEvolutionMWAngle(evolutionAnglesFDSA,times,wide)
@@ -114,6 +131,8 @@ def calculationsEvolutionForDifferentStartAngles(wide = (-10,10), positionOfAero
 # Warning!! run the previous section before in order to put a reasonnable stop point
 
 def calculationsEquilibriumForDifferentStartAngles(stopTime=200, positionOfAerodynamicCenter = 'A',forcesType ='T'):   
+    """ This function returns the equilibrium position of the main wing angle in function of the angle you have at the start at the simulation
+    mainly used to check stability"""
     global trueWindAngle 
     equilibriumAnglesFDSA  = equilibriumAngleForDifferentStartAngles(stopTime,trueWindAngle,positionOfAerodynamicCenter, forcesType)
     drawEquilibriumAngles( equilibriumAnglesFDSA)
@@ -127,6 +146,7 @@ def calculationsEquilibriumForDifferentStartAngles(stopTime=200, positionOfAerod
 
 # =====  Evolution of the MW angle for different tail angles ===== #
 def calculationsEvolutionForDifferentTailAngles(wide =(-10,10), positionOfAerodynamicCenter = 'A', forcesType = 'T'):    
+    """ This function returns the evolution of the main wing angle in function of the angle you have for the tail wing"""
     global trueWindAngle 
     evolutionAnglesFDTA,times, wide = evolutionMWAngleForDifferentTailAngles(wide, 200,trueWindAngle,positionOfAerodynamicCenter, forcesType) 
     drawEvolutionMWAngle(evolutionAnglesFDTA,times, wide,'FDTA')
@@ -138,7 +158,11 @@ def calculationsEvolutionForDifferentTailAngles(wide =(-10,10), positionOfAerody
     return()
 
 # ===== Equilibrium position for different servo wing angles (start at 0) ===== #
+
+# Warning!! run the previous section before in order to put a reasonnable stop point
+
 def calculationsEquilibriumForDifferentTailAngles(stopTime=200, positionOfAerodynamicCenter = 'A',forcesType ='T'):   
+    """ This function returns the evolution of the main wing angle in function of the angle you have for the tail wing"""
     global trueWindAngle
     equilibriumAnglesFDTA = equilibriumAngleForDifferentTailAngles(stopTime,trueWindAngle,positionOfAerodynamicCenter,forcesType)
     drawEquilibriumAngles( equilibriumAnglesFDTA,'FDTA')
@@ -150,6 +174,8 @@ def calculationsEquilibriumForDifferentTailAngles(stopTime=200, positionOfAerody
 
     # ===== Lift force on main wing in function of the angle of attack ===== #
 def liftAndDragForceOnMWInFunctionOfAlpha():
+    """ This function returns two lists with the drag and the lift (and create and display a graph) for different position of the main 
+    wing regarding the wind"""
     #In wind coordinate system 
     angles , lifts, drags = lift_dragInfunctionOfAlpha()
     

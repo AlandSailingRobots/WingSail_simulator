@@ -10,7 +10,9 @@ UNCOMMENT MAIN BLOC AT THE END OF THE FILE FOR TESTS
 """
 
 
-
+"""
+The module regroups different numerical integration schemes. Concerning the wingsail the RK2 scheme is the only one that can be used 
+"""
 import numpy as np
 from angleFunctions import wrapTo2pi
 import matplotlib.pyplot as plt
@@ -65,7 +67,7 @@ def evolution(X,t,trueWindAngle=0,positionAerodynamicCenter='A',aerodynamicForce
 
 
 
-
+"""
 if __name__=='__main__':
     state = np.array([[0.3],[0]])
     times,stateListE   = rk2Scheme2(state,0,100,0.01,evolution)
@@ -84,3 +86,4 @@ if __name__=='__main__':
     plt.ylabel('speed')
     plt.title('phasis diagram')
     plt.show()
+"""
