@@ -23,51 +23,56 @@ from drawingFunctions import drawWingSailAngle, drawWingSailIRT, drawEquilibrium
 from integrationSchemes import eulerScheme, rk2Scheme,rk2Step
 from angleFunctions import wrapTo2pi, degTorad, radTodeg, listRadTodeg, listDegTorad, listWrapTo2pi, apparentWindCoordinatesToMWCoordinates, MWCoordinatesToBoatCoordinates
 import matplotlib.pyplot as plt
+import json
+
+
+
+configPath = 'wing_sail_config.json'
 
 def reynolds(Speed,Lcarac,nu):
     return(Speed*Lcarac/nu)
 
+""" opening and reading the json configuration file """
+with open (configPath) as data_file:
+    config = json.load(data_file)
+data_file.close()
 
 
-
-
-X = 2
 
 """Constants"""
 global trueWindAngle
 trueWindAngle              = float(input('Enter true wind angle angle in degrees:'))
 trueWindAngle              = wrapTo2pi(degTorad(trueWindAngle))
-trueWindSpeed              = 7
-rho                        = 1
-nuAir                      = 15.6*(10**(-6))
+trueWindSpeed              = config["trueWindSpeed"]
+rho                        = config["rho"]
+nuAir                      = config["nuAir"]
 
 #Main wing
-MWChord                    = 0.74
-MWSpan                     = 2.785
+MWChord                    = config["mainWingChord"]                      # m
+MWSpan                     = config["mainWingSpan"]                       # m
 aspectRatioMW              = MWChord/MWSpan
-MWArea                     = 0.1184*MWSpan
+MWThickness                = config["mainWingThickness"]                    # m
+MWArea                     = MWThickness*MWSpan                           # m^2
 constPartWindForceMW       = (1/2)*rho*trueWindSpeed**2*MWArea
-MWThickness                = 0.16
 MWDesignedLiftCoefficient  = 2*np.pi*aspectRatioMW/(aspectRatioMW+2)
-print(MWDesignedLiftCoefficient)
 dontKnowHowToName          = (aspectRatioMW+1)/(aspectRatioMW+2)
 constPartWindForceMW       = (1/2)*rho*trueWindSpeed**2*MWArea
-distanceMWB                = 0.11
-distanceMWA                = -0.10
-MWMass                     = 11
+distanceMWB                = config["distanceCenterOfPressureBeforeMast"] # m
+distanceMWA                = -config["distanceCenterOfPressureAfterMast"] # m
+MWMass                     = config["mainWingMass"]
 
 
 #Servo wing
-SWChord                   = 0.3
-SWSpan                    = 0.8
+SWChord                   = config["servoWingChord"]          # m
+SWSpan                    = config["servoWingSpan"]           # m
 aspectRatioSW             = SWChord/SWSpan
-SWThickness               = 0.055
+SWThickness               = config["servoWingThickness"]      # m
 SWArea                    = SWThickness*SWSpan
-distanceTail              = -0.812 #meter
+distanceTail              = -config["distanceTailAxisToMast"]  # m
 maxTailAngle              = 26
 constPartWindForceSW      = (1/2)*rho*trueWindSpeed**2*SWArea
 SWDesignedLiftCoefficient = 2*np.pi*aspectRatioSW/(aspectRatioSW+2)
-SWMass                    = 2
+SWMass                    = 2                                 # kg
 
 
 

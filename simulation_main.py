@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 from drawingFunctions import drawWingSailAngle, drawWingSailIRT, drawEquilibriumAngles, drawArrow, drawEvolutionMWAngle, drawHull
 from angleFunctions import wrapTo2pi, degTorad, radTodeg, listRadTodeg, listDegTorad, listWrapTo2pi, apparentWindCoordinatesToMWCoordinates, MWCoordinatesToBoatCoordinates
 import matplotlib.pyplot as plt
@@ -7,7 +8,7 @@ from WingSimulator import *
 """
 UNCOMMENT MAIN BLOC AT THE END OF THE FILE FOR TESTS
 """
-
+global configPath
 
 def simulate_IRT():
     """ This function draws the state of the wing sail in real time """
@@ -274,5 +275,5 @@ def calculateTailOrder():
 if __name__ == '__main__':
 
     #simulate_IRT()
-    #calculationsTheoryForces()
+    calculationsTheoryForces()
     #calculateTailOrder()
