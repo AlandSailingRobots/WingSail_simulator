@@ -1,0 +1,19 @@
+{
+    "trueWindSpeed":7,
+    "rho":1,
+    "nuAir":0.0000156,
+    "mainWingChord":0.74,
+    "mainWingSpan":2.785,
+    "mainWingThickness":0.16,
+    "mainWingMass":11,
+    "distanceCenterOfPressureBeforeMast":0.11,
+    "distanceCenterOfPressureAfterMast":0.10,
+
+    "servoWingChord":0.3,
+    "servoWingSpan":0.8,
+    "servoWingThickness":0.16,
+    "distanceTailAxisToMast":0.812,
+    "maximumTailAngle":26,
+    "servoWingMass":2
+
+}
